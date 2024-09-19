@@ -1,104 +1,98 @@
 import React, { useEffect, useState } from "react";
-import { Calendar, CheckSquare, List, Tag, Trash, Type } from "react-feather";
+import { Type, Tag } from "react-feather";
 import { colorsList } from "../../../Helper/Util";
 import Modal from "../../Modal/Modal";
 import CustomInput from "../../CustomInput/CustomInput";
 import "./cardInfo.css";
 import Chip from "../../Common/Chip";
+import axios from "axios"; // Import axios
 
 function CardInfo(props) {
   const { onClose, card, boardId, updateCard } = props;
   const [selectedColor, setSelectedColor] = useState("");
   const [cardValues, setCardValues] = useState({ ...card });
 
-  const updateTitle = (value) => {
-    setCardValues({ ...cardValues, title: value });
+  // Validate boardId and cardValues.id
+  if (!boardId || !cardValues.id) {
+    console.error("Board ID or Card ID is missing");
+    return null;
+  }
+
+  // Update the card title
+  const updateTitle = async (value) => {
+    const updatedCard = { ...cardValues, title: value };
+    setCardValues(updatedCard);
+
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/cards/update/${boardId}/${cardValues.id}`,
+        updatedCard
+      );
+      console.log("Card updated:", response.data);
+    } catch (error) {
+      console.error(
+        "Error updating card title:",
+        error.response?.data || error.message
+      );
+    }
   };
 
-  const updateDesc = (value) => {
-    setCardValues({ ...cardValues, desc: value });
-  };
+  // Add a label with the selected color
+  const addLabel = async (color) => {
+    if (cardValues.labels.find((label) => label.color === color)) return;
 
-  const addLabel = (label) => {
-    const index = cardValues.labels.findIndex(
-      (item) => item.text === label.text
-    );
-    if (index > -1) return;
-
-    setSelectedColor("");
-    setCardValues({
+    const newLabel = { text: `Label ${Date.now()}`, color };
+    const updatedCard = {
       ...cardValues,
-      labels: [...cardValues.labels, label],
-    });
-  };
-
-  const removeLabel = (label) => {
-    const tempLabels = cardValues.labels.filter(
-      (item) => item.text !== label.text
-    );
-    setCardValues({
-      ...cardValues,
-      labels: tempLabels,
-    });
-  };
-
-  const addTask = (value) => {
-    const task = {
-      id: Date.now() + Math.random() * 2,
-      completed: false,
-      text: value,
+      labels: [...cardValues.labels, newLabel],
     };
-    setCardValues({
-      ...cardValues,
-      tasks: [...cardValues.tasks, task],
-    });
+    setCardValues(updatedCard);
+
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/cards/update/${boardId}/${cardValues.id}`,
+        updatedCard
+      );
+      console.log("Card updated with new label:", response.data);
+    } catch (error) {
+      console.error(
+        "Error adding label:",
+        error.response?.data || error.message
+      );
+    }
+    setSelectedColor("");
   };
 
-  const removeTask = (id) => {
-    const tempTasks = cardValues.tasks.filter((item) => item.id !== id);
-    setCardValues({
-      ...cardValues,
-      tasks: tempTasks,
-    });
+  // Remove a label by its color
+  const removeLabel = async (color) => {
+    const updatedLabels = cardValues.labels.filter(
+      (label) => label.color !== color
+    );
+    const updatedCard = { ...cardValues, labels: updatedLabels };
+    setCardValues(updatedCard);
+
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/api/cards/update/${boardId}/${cardValues.id}`,
+        updatedCard
+      );
+      console.log("Card updated after label removal:", response.data);
+    } catch (error) {
+      console.error(
+        "Error removing label:",
+        error.response?.data || error.message
+      );
+    }
   };
 
-  const updateTask = (id, value) => {
-    const tasks = [...cardValues.tasks];
-    const index = tasks.findIndex((item) => item.id === id);
-    if (index < 0) return;
-
-    tasks[index].completed = Boolean(value);
-
-    setCardValues({
-      ...cardValues,
-      tasks,
-    });
-  };
-
-  const calculatePercent = () => {
-    if (!cardValues.tasks?.length) return 0;
-    const completed = cardValues.tasks.filter((item) => item.completed).length;
-    return (completed / cardValues.tasks.length) * 100;
-  };
-
-  const updateDate = (date) => {
-    if (!date) return;
-
-    setCardValues({
-      ...cardValues,
-      date,
-    });
-  };
-
-  useEffect(() => {
-    if (updateCard) updateCard(boardId, cardValues.id, cardValues);
-  }, [cardValues, boardId, updateCard]);
-
-  const calculatedPercent = calculatePercent();
+  // useEffect(() => {
+  //   if (updateCard) updateCard(boardId, cardValues.id, cardValues);
+  // }, [cardValues, boardId, updateCard]);
 
   return (
     <Modal onClose={onClose}>
       <div className="cardinfo">
+        {/* Title Section */}
         <div className="cardinfo-box">
           <div className="cardinfo-box-title">
             <Type />
@@ -112,19 +106,7 @@ function CardInfo(props) {
           />
         </div>
 
-        <div className="cardinfo-box">
-          <div className="cardinfo-box-title">
-            <List />
-            <p>Description</p>
-          </div>
-          <CustomInput
-            defaultValue={cardValues.desc}
-            text={cardValues.desc}
-            placeholder="Enter Description"
-            onSubmit={updateDesc}
-          />
-        </div>
-
+        {/* Label Color Section */}
         <div className="cardinfo-box">
           <div className="cardinfo-box-title">
             <Tag />
@@ -147,71 +129,18 @@ function CardInfo(props) {
               <Chip
                 key={index}
                 item={label}
-                onRemove={() => removeLabel(label)}
+                onRemove={() => removeLabel(label.color)}
               />
             ))}
           </div>
           {selectedColor && (
             <button
               className="cardinfo-add-label"
-              onClick={() =>
-                addLabel({ text: `Label ${Date.now()}`, color: selectedColor })
-              }
+              onClick={() => addLabel(selectedColor)}
             >
               Add Label
             </button>
           )}
-        </div>
-
-        <div className="cardinfo-box">
-          <div className="cardinfo-box-title">
-            <Calendar />
-            <p>Date</p>
-          </div>
-          <input
-            type="date"
-            value={cardValues.date || ""}
-            onChange={(e) => updateDate(e.target.value)}
-          />
-        </div>
-
-        <div className="cardinfo-box">
-          <div className="cardinfo-box-title">
-            <CheckSquare />
-            <p>Tasks</p>
-          </div>
-          <ul>
-            {cardValues.tasks.map((task) => (
-              <li key={task.id}>
-                <input
-                  type="checkbox"
-                  checked={task.completed}
-                  onChange={(e) => updateTask(task.id, e.target.checked)}
-                />
-                <span>{task.text}</span>
-                <button onClick={() => removeTask(task.id)}>
-                  <Trash />
-                </button>
-              </li>
-            ))}
-          </ul>
-          <button onClick={() => addTask(`Task ${Date.now()}`)}>
-            Add Task
-          </button>
-        </div>
-
-        <div className="cardinfo-progress">
-          <div className="cardinfo-progress-bar">
-            <div
-              className="cardinfo-progress-bar-fill"
-              style={{
-                width: `${calculatedPercent}%`,
-                backgroundColor:
-                  calculatedPercent === 100 ? "limegreen" : "lightblue",
-              }}
-            />
-          </div>
-          <p>{calculatedPercent.toFixed(0)}% Completed</p>
         </div>
       </div>
     </Modal>

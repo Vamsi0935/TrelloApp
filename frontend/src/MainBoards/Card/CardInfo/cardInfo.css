@@ -125,3 +125,30 @@
     font-size: 1rem;
     padding: 10px;
 }
+
+.cardinfo-box {
+    margin-bottom: 16px;
+}
+
+.cardinfo-box-title {
+    display: flex;
+    align-items: center;
+}
+
+.cardinfo-box-color {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin: 4px;
+}
+
+.cardinfo-box-labels {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.cardinfo-add-label {
+    margin-top: 8px;
+}

@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios"; // Axios for API calls
+import Swal from "sweetalert2";
 import "./dashboard.css";
 import CustomInput from "../MainBoards/CustomInput/CustomInput";
 import Board from "../MainBoards/Boards/Board";
-import axios from "axios";
-import Swal from "sweetalert2";
 
 function Dashboard() {
   const [boards, setBoards] = useState([]);
   const [targetCard, setTargetCard] = useState({ boardId: 0, cardId: 0 });
 
+  // Fetch boards from the API
   useEffect(() => {
     const fetchBoards = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/boards/");
         setBoards(response.data);
       } catch (error) {
-        Swal.fire("Error", "Failed to fetch boards", "error");
         console.error("Error fetching boards:", error);
       }
     };
@@ -30,8 +30,8 @@ function Dashboard() {
       );
       setBoards((prevBoards) => [...prevBoards, response.data]);
     } catch (error) {
-      Swal.fire("Error", "Failed to add board", "error");
       console.error("Error adding board:", error);
+      Swal.fire("Error", "Failed to add board", "error");
     }
   };
 
@@ -42,16 +42,24 @@ function Dashboard() {
         prevBoards.filter((item) => item._id !== boardId)
       );
     } catch (error) {
-      Swal.fire("Error", "Failed to remove board", "error");
-      console.error("Error deleting board:", error);
+      console.error("Error removing board:", error);
+      Swal.fire("Error", "Failed to delete board", "error");
     }
   };
 
+  // Add card via API
   const addCardHandler = async (boardId, title) => {
     try {
+      const newCard = {
+        title,
+        labels: [],
+        date: "",
+        tasks: [],
+        desc: "",
+      };
       const response = await axios.post(
         `http://localhost:5000/api/cards/add/${boardId}`,
-        { title, labels: [], date: "", tasks: [], desc: "" }
+        newCard
       );
       setBoards((prevBoards) =>
         prevBoards.map((b) =>
@@ -59,11 +67,12 @@ function Dashboard() {
         )
       );
     } catch (error) {
-      Swal.fire("Error", "Failed to add card", "error");
       console.error("Error adding card:", error);
+      Swal.fire("Error", "Failed to add card", "error");
     }
   };
 
+  // Remove card via API
   const removeCard = async (boardId, cardId) => {
     try {
       await axios.delete(
@@ -77,11 +86,12 @@ function Dashboard() {
         )
       );
     } catch (error) {
-      Swal.fire("Error", "Failed to remove card", "error");
       console.error("Error removing card:", error);
+      Swal.fire("Error", "Failed to remove card", "error");
     }
   };
 
+  // Update card via API
   const updateCard = async (boardId, cardId, updatedCard) => {
     try {
       const response = await axios.put(
@@ -101,8 +111,8 @@ function Dashboard() {
         )
       );
     } catch (error) {
-      Swal.fire("Error", "Failed to update card", "error");
       console.error("Error updating card:", error);
+      Swal.fire("Error", "Failed to update card", "error");
     }
   };
 
@@ -130,7 +140,6 @@ function Dashboard() {
     const sourceCard = boards[sourceBoardIndex].cards[sourceCardIndex];
     const tempBoardsList = [...boards];
 
-    // Move the card
     tempBoardsList[sourceBoardIndex].cards.splice(sourceCardIndex, 1);
     tempBoardsList[targetBoardIndex].cards.splice(
       targetCardIndexInTargetBoard,
@@ -140,7 +149,6 @@ function Dashboard() {
 
     setBoards(tempBoardsList);
 
-    // Update the cards after drag
     updateCard(sourceBoardId, sourceCardId, sourceCard);
     updateCard(targetCard.boardId, targetCard.cardId, sourceCard);
 

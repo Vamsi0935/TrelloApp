@@ -3,35 +3,35 @@ import CardInfo from "./CardInfo/CardInfo";
 import { formatDate } from "../../Helper/Util";
 import Chip from "../Common/Chip";
 import Dropdown from "../Dropdown/Dropdown";
-import axios from "axios";
+import axios from "axios"; // Add Axios
 import "./card.css";
 
-function Card(props) {
-  const { card, boardId, removeCard, onDragEnd, onDragEnter, updateCard } =
-    props;
-  const { _id: cardId, title, desc, date, tasks, labels } = card || {}; // Changed from `id` to `_id`
+function Card({
+  card,
+  boardId,
+  removeCardLocally, // To update the UI after removing the card
+  onDragEnd,
+  onDragEnter,
+  updateCardLocally,
+  handleUpdateCard, // To update the UI after updating the card
+}) {
+  const { id: cardId, title, desc, date, tasks, labels } = card || {};
+
   const [showDropdown, setShowDropdown] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  // Add logs to debug the values
+  console.log("Card props:", { boardId, cardId, card });
 
   const handleDragEnd = () => {
     if (boardId && cardId) {
       onDragEnd(boardId, cardId);
-    } else {
-      console.error("Invalid boardId or cardId during drag end", {
-        boardId,
-        cardId,
-      });
     }
   };
 
   const handleDragEnter = () => {
     if (boardId && cardId) {
       onDragEnter(boardId, cardId);
-    } else {
-      console.error("Invalid boardId or cardId during drag enter", {
-        boardId,
-        cardId,
-      });
     }
   };
 
@@ -47,33 +47,31 @@ function Card(props) {
   // Remove card functionality
   const handleRemoveCard = async () => {
     try {
-      if (!boardId || !cardId) {
-        throw new Error("Invalid boardId or cardId");
-      }
-      console.log(`Removing card with boardId: ${boardId}, cardId: ${cardId}`);
-      await axios.delete(`http://localhost:5000/api/boards/delete/${boardId}`);
-      console.log("Card removed successfully");
-      removeCard(boardId, cardId); // Remove card from UI
-    } catch (error) {
-      console.error("Failed to delete card:", error.message);
-    }
-  };
+      if (boardId && cardId) {
+        // Log request details
+        console.log(
+          `Attempting to remove card: ${cardId} from board: ${boardId}`
+        );
 
-  // Update card functionality
-  const handleUpdateCard = async (updatedCard) => {
-    try {
-      if (!boardId || !cardId) {
-        throw new Error("Invalid boardId or cardId");
+        // API call to remove the card
+        const response = await axios.delete(
+          `http://localhost:5000/api/cards/remove/${boardId}/${cardId}`
+        );
+
+        // Log response from the API
+        console.log("Card removed successfully:", response.data);
+
+        // Update the UI by removing the card
+        removeCardLocally(boardId, cardId);
+      } else {
+        console.error("Missing boardId or cardId");
       }
-      console.log(`Updating card with boardId: ${boardId}, cardId: ${cardId}`);
-      const response = await axios.put(
-        `http://localhost:5000/api/boards/${boardId}`,
-        updatedCard
-      );
-      console.log("Card updated successfully:", response.data);
-      updateCard(boardId, cardId, response.data); // Update card in UI
     } catch (error) {
-      console.error("Failed to update card:", error.message);
+      console.error("Error removing card:", error);
+      // Check for any specific error response from the server
+      if (error.response) {
+        console.error("Server response:", error.response.data);
+      }
     }
   };
 
@@ -89,7 +87,6 @@ function Card(props) {
       )}
       <div
         className="card"
-        key={cardId}
         draggable
         onDragEnd={handleDragEnd}
         onDragEnter={handleDragEnter}
@@ -114,14 +111,11 @@ function Card(props) {
           </div>
         </div>
         <div className="card-title">{title}</div>
-        <div>
-          <p title={desc}>✎</p>
-        </div>
         <div className="card-footer">
-          {date && <p className="card-footer-item">⏰ {formatDate(date)}</p>}
-          {tasks && tasks.length > 0 && (
-            <p className="card-footer-item">
-              ✅ {tasks.filter((item) => item.completed).length}/{tasks.length}
+          {date && <p className="card-date">{formatDate(date)}</p>}
+          {tasks?.length > 0 && (
+            <p className="card-tasks">
+              {tasks?.filter((item) => item.completed)?.length}/{tasks?.length}
             </p>
           )}
         </div>
