@@ -8,13 +8,22 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(
-  cors({
-    origin: "http://localhost:3000","https://trello-app-frontend-mocha.vercel.app",
-    methods:["GET","POST","PUT","DELETE"],
-    credentials: true,
-  })
-);
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://trello-app-frontend-mocha.vercel.app'
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: 'GET,PUT,POST,DELETE',
+  credentials: true
+}));
 
 mongoose
   .connect(
