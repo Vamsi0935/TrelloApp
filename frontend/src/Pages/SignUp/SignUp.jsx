@@ -45,7 +45,7 @@ const SignUp = () => {
     if (isValid) {
       try {
         const response = await axios.post(
-          "http://localhost:5000/api/users/signup",
+          "https://trello-app-api.vercel.app/api/users/signup",
           {
             email,
             password,
