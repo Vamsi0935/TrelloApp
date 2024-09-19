@@ -1,0 +1,32 @@
+.calendar-container {
+    text-align: center;
+    /* Center-aligns the text and content */
+    padding: 20px;
+    /* Adds space around the content */
+    max-width: 600px;
+    /* Sets a maximum width for the container */
+    margin: 0 auto;
+    /* Centers the container horizontally */
+    border: 1px solid #ddd;
+    /* Adds a border around the container */
+    border-radius: 8px;
+    /* Rounds the corners of the container */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    /* Adds a subtle shadow effect */
+    background-color: #f9f9f9;
+    /* Sets a light background color */
+}
+
+h1 {
+    margin-bottom: 20px;
+    /* Adds space below the heading */
+    color: #333;
+    /* Sets a dark color for the heading */
+}
+
+p {
+    margin-top: 20px;
+    /* Adds space above the paragraph */
+    color: #555;
+    /* Sets a medium-dark color for the text */
+}

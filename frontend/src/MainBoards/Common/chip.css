@@ -1,0 +1,20 @@
+.chip {
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+    margin: 2px;
+    cursor: default;
+    /* Show default cursor to indicate the chip is not clickable */
+}
+
+.chip-remove {
+    margin-left: 8px;
+    cursor: pointer;
+    /* Change cursor to pointer for clickable remove icon */
+    font-size: 14px;
+    user-select: none;
+    /* Prevent text selection when clicking */
+}

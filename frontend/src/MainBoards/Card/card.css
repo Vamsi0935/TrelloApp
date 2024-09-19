@@ -1,0 +1,59 @@
+.card {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+    padding: 16px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-top-labels {
+    display: flex;
+    gap: 4px;
+}
+
+.card-top-more {
+    cursor: pointer;
+    position: relative;
+}
+
+.card-top-more:hover .board-dropdown {
+    display: block;
+}
+
+.card-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    color: #666;
+}
+
+.card-footer-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.board-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 8px;
+    z-index: 10;
+}
